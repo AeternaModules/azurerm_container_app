@@ -168,102 +168,102 @@ EOT
     workload_profile_name        = optional(string)
     template = object({
       azure_queue_scale_rule = optional(object({
-        authentication = object({
+        authentication = list(object({
           secret_name       = string
           trigger_parameter = string
-        })
+        }))
         name         = string
         queue_length = number
         queue_name   = string
       }))
-      container = object({
+      container = list(object({
         args    = optional(list(string))
         command = optional(list(string))
         cpu     = number
-        env = optional(object({
+        env = optional(list(object({
           name        = string
           secret_name = optional(string)
           value       = optional(string)
-        }))
+        })))
         image = string
-        liveness_probe = optional(object({
-          failure_count_threshold = optional(number, 3)
+        liveness_probe = optional(list(object({
+          failure_count_threshold = optional(number) # Default: 3
           header = optional(object({
             name  = string
             value = string
           }))
           host             = optional(string)
-          initial_delay    = optional(number, 1)
-          interval_seconds = optional(number, 10)
+          initial_delay    = optional(number) # Default: 1
+          interval_seconds = optional(number) # Default: 10
           path             = optional(string)
           port             = number
-          timeout          = optional(number, 1)
+          timeout          = optional(number) # Default: 1
           transport        = string
-        }))
+        })))
         memory = string
         name   = string
-        readiness_probe = optional(object({
-          failure_count_threshold = optional(number, 3)
+        readiness_probe = optional(list(object({
+          failure_count_threshold = optional(number) # Default: 3
           header = optional(object({
             name  = string
             value = string
           }))
           host                    = optional(string)
-          initial_delay           = optional(number, 0)
-          interval_seconds        = optional(number, 10)
+          initial_delay           = optional(number) # Default: 0
+          interval_seconds        = optional(number) # Default: 10
           path                    = optional(string)
           port                    = number
-          success_count_threshold = optional(number, 3)
-          timeout                 = optional(number, 1)
+          success_count_threshold = optional(number) # Default: 3
+          timeout                 = optional(number) # Default: 1
           transport               = string
-        }))
-        startup_probe = optional(object({
-          failure_count_threshold = optional(number, 3)
+        })))
+        startup_probe = optional(list(object({
+          failure_count_threshold = optional(number) # Default: 3
           header = optional(object({
             name  = string
             value = string
           }))
           host             = optional(string)
-          initial_delay    = optional(number, 0)
-          interval_seconds = optional(number, 10)
+          initial_delay    = optional(number) # Default: 0
+          interval_seconds = optional(number) # Default: 10
           path             = optional(string)
           port             = number
-          timeout          = optional(number, 1)
+          timeout          = optional(number) # Default: 1
           transport        = string
-        }))
+        })))
         volume_mounts = optional(object({
           name     = string
           path     = string
           sub_path = optional(string)
         }))
-      })
-      cooldown_period_in_seconds = optional(number, 300)
+      }))
+      cooldown_period_in_seconds = optional(number) # Default: 300
       custom_scale_rule = optional(object({
-        authentication = optional(object({
+        authentication = optional(list(object({
           secret_name       = string
           trigger_parameter = string
-        }))
+        })))
         custom_rule_type = string
         metadata         = map(string)
         name             = string
       }))
       http_scale_rule = optional(object({
-        authentication = optional(object({
+        authentication = optional(list(object({
           secret_name       = string
           trigger_parameter = optional(string)
-        }))
+        })))
         concurrent_requests = string
         name                = string
       }))
-      init_container = optional(object({
+      init_container = optional(list(object({
         args    = optional(list(string))
         command = optional(list(string))
         cpu     = optional(number)
-        env = optional(object({
+        env = optional(list(object({
           name        = string
           secret_name = optional(string)
           value       = optional(string)
-        }))
+        })))
         image  = string
         memory = optional(string)
         name   = string
@@ -272,41 +272,41 @@ EOT
           path     = string
           sub_path = optional(string)
         }))
-      }))
-      max_replicas                = optional(number, 10)
-      min_replicas                = optional(number, 0)
-      polling_interval_in_seconds = optional(number, 30)
+      })))
+      max_replicas                = optional(number) # Default: 10
+      min_replicas                = optional(number) # Default: 0
+      polling_interval_in_seconds = optional(number) # Default: 30
       revision_suffix             = optional(string)
       tcp_scale_rule = optional(object({
-        authentication = optional(object({
+        authentication = optional(list(object({
           secret_name       = string
           trigger_parameter = optional(string)
-        }))
+        })))
         concurrent_requests = string
         name                = string
       }))
-      termination_grace_period_seconds = optional(number, 0)
-      volume = optional(object({
+      termination_grace_period_seconds = optional(number) # Default: 0
+      volume = optional(list(object({
         mount_options = optional(string)
         name          = string
         storage_name  = optional(string)
-        storage_type  = optional(string, "EmptyDir")
-      }))
+        storage_type  = optional(string) # Default: "EmptyDir"
+      })))
     })
     dapr = optional(object({
       app_id       = string
       app_port     = optional(number)
-      app_protocol = optional(string, "http")
+      app_protocol = optional(string) # Default: "http"
     }))
     identity = optional(object({
       identity_ids = optional(set(string))
       type         = string
     }))
     ingress = optional(object({
-      allow_insecure_connections = optional(bool, false)
+      allow_insecure_connections = optional(bool) # Default: false
       client_certificate_mode    = optional(string)
       cors = optional(object({
-        allow_credentials_enabled = optional(bool, false)
+        allow_credentials_enabled = optional(bool) # Default: false
         allowed_headers           = optional(list(string))
         allowed_methods           = optional(list(string))
         allowed_origins           = list(string)
@@ -314,7 +314,7 @@ EOT
         max_age_in_seconds        = optional(number)
       }))
       exposed_port     = optional(number)
-      external_enabled = optional(bool, false)
+      external_enabled = optional(bool) # Default: false
       ip_security_restriction = optional(object({
         action           = string
         description      = optional(string)
@@ -324,18 +324,18 @@ EOT
       target_port = number
       traffic_weight = object({
         label           = optional(string)
-        latest_revision = optional(bool, false)
+        latest_revision = optional(bool) # Default: false
         percentage      = number
         revision_suffix = optional(string)
       })
-      transport = optional(string, "auto")
+      transport = optional(string) # Default: "auto"
     }))
-    registry = optional(object({
+    registry = optional(list(object({
       identity             = optional(string)
       password_secret_name = optional(string)
       server               = string
       username             = optional(string)
-    }))
+    })))
     secret = optional(object({
       identity            = optional(string)
       key_vault_secret_id = optional(string)
@@ -343,5 +343,109 @@ EOT
       value               = optional(string)
     }))
   }))
+  validation {
+    condition = alltrue([
+      for k, v in var.container_apps : (
+        length(v.template.azure_queue_scale_rule.authentication) >= 1
+      )
+    ])
+    error_message = "Each authentication list must contain at least 1 items"
+  }
+  validation {
+    condition = alltrue([
+      for k, v in var.container_apps : (
+        length(v.template.container) >= 1
+      )
+    ])
+    error_message = "Each container list must contain at least 1 items"
+  }
+  validation {
+    condition = alltrue([
+      for k, v in var.container_apps : (
+        alltrue([for item in v.template.container : (item.env == null || (length(item.env) >= 1))])
+      )
+    ])
+    error_message = "Each env list must contain at least 1 items"
+  }
+  validation {
+    condition = alltrue([
+      for k, v in var.container_apps : (
+        alltrue([for item in v.template.container : (item.liveness_probe == null || (length(item.liveness_probe) >= 1))])
+      )
+    ])
+    error_message = "Each liveness_probe list must contain at least 1 items"
+  }
+  validation {
+    condition = alltrue([
+      for k, v in var.container_apps : (
+        alltrue([for item in v.template.container : (item.readiness_probe == null || (length(item.readiness_probe) >= 1))])
+      )
+    ])
+    error_message = "Each readiness_probe list must contain at least 1 items"
+  }
+  validation {
+    condition = alltrue([
+      for k, v in var.container_apps : (
+        alltrue([for item in v.template.container : (item.startup_probe == null || (length(item.startup_probe) >= 1))])
+      )
+    ])
+    error_message = "Each startup_probe list must contain at least 1 items"
+  }
+  validation {
+    condition = alltrue([
+      for k, v in var.container_apps : (
+        v.template.custom_scale_rule.authentication == null || (length(v.template.custom_scale_rule.authentication) >= 1)
+      )
+    ])
+    error_message = "Each authentication list must contain at least 1 items"
+  }
+  validation {
+    condition = alltrue([
+      for k, v in var.container_apps : (
+        v.template.http_scale_rule.authentication == null || (length(v.template.http_scale_rule.authentication) >= 1)
+      )
+    ])
+    error_message = "Each authentication list must contain at least 1 items"
+  }
+  validation {
+    condition = alltrue([
+      for k, v in var.container_apps : (
+        v.template.init_container == null || (length(v.template.init_container) >= 1)
+      )
+    ])
+    error_message = "Each init_container list must contain at least 1 items"
+  }
+  validation {
+    condition = alltrue([
+      for k, v in var.container_apps : (
+        v.template.init_container == null || alltrue([for item in v.template.init_container : (item.env == null || (length(item.env) >= 1))])
+      )
+    ])
+    error_message = "Each env list must contain at least 1 items"
+  }
+  validation {
+    condition = alltrue([
+      for k, v in var.container_apps : (
+        v.template.tcp_scale_rule.authentication == null || (length(v.template.tcp_scale_rule.authentication) >= 1)
+      )
+    ])
+    error_message = "Each authentication list must contain at least 1 items"
+  }
+  validation {
+    condition = alltrue([
+      for k, v in var.container_apps : (
+        v.template.volume == null || (length(v.template.volume) >= 1)
+      )
+    ])
+    error_message = "Each volume list must contain at least 1 items"
+  }
+  validation {
+    condition = alltrue([
+      for k, v in var.container_apps : (
+        v.registry == null || (length(v.registry) >= 1)
+      )
+    ])
+    error_message = "Each registry list must contain at least 1 items"
+  }
 }
 
