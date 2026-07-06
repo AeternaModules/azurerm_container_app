@@ -72,6 +72,7 @@ Required:
                 - secret_name (required)
                 - trigger_parameter (required)
             - custom_rule_type (required)
+            - identity_id (optional)
             - metadata (required)
             - name (required)
         - http_scale_rule (optional, block):
@@ -244,6 +245,7 @@ EOT
           trigger_parameter = string
         })))
         custom_rule_type = string
+        identity_id      = optional(string)
         metadata         = map(string)
         name             = string
       }))

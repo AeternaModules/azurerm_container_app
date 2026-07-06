@@ -125,6 +125,7 @@ resource "azurerm_container_app" "container_apps" {
           }
         }
         custom_rule_type = custom_scale_rule.value.custom_rule_type
+        identity_id      = custom_scale_rule.value.identity_id
         metadata         = custom_scale_rule.value.metadata
         name             = custom_scale_rule.value.name
       }
