@@ -11,7 +11,7 @@ resource "azurerm_container_app" "container_apps" {
 
   template {
     dynamic "azure_queue_scale_rule" {
-      for_each = each.value.template.azure_queue_scale_rule != null ? [each.value.template.azure_queue_scale_rule] : []
+      for_each = each.value.template.azure_queue_scale_rule != null ? each.value.template.azure_queue_scale_rule : []
       content {
         dynamic "authentication" {
           for_each = azure_queue_scale_rule.value.authentication
@@ -45,7 +45,7 @@ resource "azurerm_container_app" "container_apps" {
           content {
             failure_count_threshold = liveness_probe.value.failure_count_threshold
             dynamic "header" {
-              for_each = liveness_probe.value.header != null ? [liveness_probe.value.header] : []
+              for_each = liveness_probe.value.header != null ? liveness_probe.value.header : []
               content {
                 name  = header.value.name
                 value = header.value.value
@@ -67,7 +67,7 @@ resource "azurerm_container_app" "container_apps" {
           content {
             failure_count_threshold = readiness_probe.value.failure_count_threshold
             dynamic "header" {
-              for_each = readiness_probe.value.header != null ? [readiness_probe.value.header] : []
+              for_each = readiness_probe.value.header != null ? readiness_probe.value.header : []
               content {
                 name  = header.value.name
                 value = header.value.value
@@ -88,7 +88,7 @@ resource "azurerm_container_app" "container_apps" {
           content {
             failure_count_threshold = startup_probe.value.failure_count_threshold
             dynamic "header" {
-              for_each = startup_probe.value.header != null ? [startup_probe.value.header] : []
+              for_each = startup_probe.value.header != null ? startup_probe.value.header : []
               content {
                 name  = header.value.name
                 value = header.value.value
@@ -104,7 +104,7 @@ resource "azurerm_container_app" "container_apps" {
           }
         }
         dynamic "volume_mounts" {
-          for_each = container.value.volume_mounts != null ? [container.value.volume_mounts] : []
+          for_each = container.value.volume_mounts != null ? container.value.volume_mounts : []
           content {
             name     = volume_mounts.value.name
             path     = volume_mounts.value.path
@@ -115,7 +115,7 @@ resource "azurerm_container_app" "container_apps" {
     }
     cooldown_period_in_seconds = each.value.template.cooldown_period_in_seconds
     dynamic "custom_scale_rule" {
-      for_each = each.value.template.custom_scale_rule != null ? [each.value.template.custom_scale_rule] : []
+      for_each = each.value.template.custom_scale_rule != null ? each.value.template.custom_scale_rule : []
       content {
         dynamic "authentication" {
           for_each = custom_scale_rule.value.authentication != null ? custom_scale_rule.value.authentication : []
@@ -131,7 +131,7 @@ resource "azurerm_container_app" "container_apps" {
       }
     }
     dynamic "http_scale_rule" {
-      for_each = each.value.template.http_scale_rule != null ? [each.value.template.http_scale_rule] : []
+      for_each = each.value.template.http_scale_rule != null ? each.value.template.http_scale_rule : []
       content {
         dynamic "authentication" {
           for_each = http_scale_rule.value.authentication != null ? http_scale_rule.value.authentication : []
@@ -162,7 +162,7 @@ resource "azurerm_container_app" "container_apps" {
         memory = init_container.value.memory
         name   = init_container.value.name
         dynamic "volume_mounts" {
-          for_each = init_container.value.volume_mounts != null ? [init_container.value.volume_mounts] : []
+          for_each = init_container.value.volume_mounts != null ? init_container.value.volume_mounts : []
           content {
             name     = volume_mounts.value.name
             path     = volume_mounts.value.path
@@ -176,7 +176,7 @@ resource "azurerm_container_app" "container_apps" {
     polling_interval_in_seconds = each.value.template.polling_interval_in_seconds
     revision_suffix             = each.value.template.revision_suffix
     dynamic "tcp_scale_rule" {
-      for_each = each.value.template.tcp_scale_rule != null ? [each.value.template.tcp_scale_rule] : []
+      for_each = each.value.template.tcp_scale_rule != null ? each.value.template.tcp_scale_rule : []
       content {
         dynamic "authentication" {
           for_each = tcp_scale_rule.value.authentication != null ? tcp_scale_rule.value.authentication : []
@@ -237,7 +237,7 @@ resource "azurerm_container_app" "container_apps" {
       exposed_port     = ingress.value.exposed_port
       external_enabled = ingress.value.external_enabled
       dynamic "ip_security_restriction" {
-        for_each = ingress.value.ip_security_restriction != null ? [ingress.value.ip_security_restriction] : []
+        for_each = ingress.value.ip_security_restriction != null ? ingress.value.ip_security_restriction : []
         content {
           action           = ip_security_restriction.value.action
           description      = ip_security_restriction.value.description
@@ -246,11 +246,14 @@ resource "azurerm_container_app" "container_apps" {
         }
       }
       target_port = ingress.value.target_port
-      traffic_weight {
-        label           = ingress.value.traffic_weight.label
-        latest_revision = ingress.value.traffic_weight.latest_revision
-        percentage      = ingress.value.traffic_weight.percentage
-        revision_suffix = ingress.value.traffic_weight.revision_suffix
+      dynamic "traffic_weight" {
+        for_each = ingress.value.traffic_weight
+        content {
+          label           = traffic_weight.value.label
+          latest_revision = traffic_weight.value.latest_revision
+          percentage      = traffic_weight.value.percentage
+          revision_suffix = traffic_weight.value.revision_suffix
+        }
       }
       transport = ingress.value.transport
     }
@@ -267,7 +270,7 @@ resource "azurerm_container_app" "container_apps" {
   }
 
   dynamic "secret" {
-    for_each = each.value.secret != null ? [each.value.secret] : []
+    for_each = each.value.secret != null ? each.value.secret : []
     content {
       identity            = secret.value.identity
       key_vault_secret_id = secret.value.key_vault_secret_id

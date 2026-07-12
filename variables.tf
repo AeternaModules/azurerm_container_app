@@ -168,7 +168,7 @@ EOT
     tags                         = optional(map(string))
     workload_profile_name        = optional(string)
     template = object({
-      azure_queue_scale_rule = optional(object({
+      azure_queue_scale_rule = optional(list(object({
         authentication = list(object({
           secret_name       = string
           trigger_parameter = string
@@ -176,7 +176,7 @@ EOT
         name         = string
         queue_length = number
         queue_name   = string
-      }))
+      })))
       container = list(object({
         args    = optional(list(string))
         command = optional(list(string))
@@ -189,10 +189,10 @@ EOT
         image = string
         liveness_probe = optional(list(object({
           failure_count_threshold = optional(number) # Default: 3
-          header = optional(object({
+          header = optional(list(object({
             name  = string
             value = string
-          }))
+          })))
           host             = optional(string)
           initial_delay    = optional(number) # Default: 1
           interval_seconds = optional(number) # Default: 10
@@ -205,10 +205,10 @@ EOT
         name   = string
         readiness_probe = optional(list(object({
           failure_count_threshold = optional(number) # Default: 3
-          header = optional(object({
+          header = optional(list(object({
             name  = string
             value = string
-          }))
+          })))
           host                    = optional(string)
           initial_delay           = optional(number) # Default: 0
           interval_seconds        = optional(number) # Default: 10
@@ -220,10 +220,10 @@ EOT
         })))
         startup_probe = optional(list(object({
           failure_count_threshold = optional(number) # Default: 3
-          header = optional(object({
+          header = optional(list(object({
             name  = string
             value = string
-          }))
+          })))
           host             = optional(string)
           initial_delay    = optional(number) # Default: 0
           interval_seconds = optional(number) # Default: 10
@@ -232,14 +232,14 @@ EOT
           timeout          = optional(number) # Default: 1
           transport        = string
         })))
-        volume_mounts = optional(object({
+        volume_mounts = optional(list(object({
           name     = string
           path     = string
           sub_path = optional(string)
-        }))
+        })))
       }))
       cooldown_period_in_seconds = optional(number) # Default: 300
-      custom_scale_rule = optional(object({
+      custom_scale_rule = optional(list(object({
         authentication = optional(list(object({
           secret_name       = string
           trigger_parameter = string
@@ -248,15 +248,15 @@ EOT
         identity_id      = optional(string)
         metadata         = map(string)
         name             = string
-      }))
-      http_scale_rule = optional(object({
+      })))
+      http_scale_rule = optional(list(object({
         authentication = optional(list(object({
           secret_name       = string
           trigger_parameter = optional(string)
         })))
         concurrent_requests = string
         name                = string
-      }))
+      })))
       init_container = optional(list(object({
         args    = optional(list(string))
         command = optional(list(string))
@@ -269,24 +269,24 @@ EOT
         image  = string
         memory = optional(string)
         name   = string
-        volume_mounts = optional(object({
+        volume_mounts = optional(list(object({
           name     = string
           path     = string
           sub_path = optional(string)
-        }))
+        })))
       })))
       max_replicas                = optional(number) # Default: 10
       min_replicas                = optional(number) # Default: 0
       polling_interval_in_seconds = optional(number) # Default: 30
       revision_suffix             = optional(string)
-      tcp_scale_rule = optional(object({
+      tcp_scale_rule = optional(list(object({
         authentication = optional(list(object({
           secret_name       = string
           trigger_parameter = optional(string)
         })))
         concurrent_requests = string
         name                = string
-      }))
+      })))
       termination_grace_period_seconds = optional(number) # Default: 0
       volume = optional(list(object({
         mount_options = optional(string)
@@ -317,19 +317,19 @@ EOT
       }))
       exposed_port     = optional(number)
       external_enabled = optional(bool) # Default: false
-      ip_security_restriction = optional(object({
+      ip_security_restriction = optional(list(object({
         action           = string
         description      = optional(string)
         ip_address_range = string
         name             = string
-      }))
+      })))
       target_port = number
-      traffic_weight = object({
+      traffic_weight = list(object({
         label           = optional(string)
         latest_revision = optional(bool) # Default: false
         percentage      = number
         revision_suffix = optional(string)
-      })
+      }))
       transport = optional(string) # Default: "auto"
     }))
     registry = optional(list(object({
@@ -338,17 +338,17 @@ EOT
       server               = string
       username             = optional(string)
     })))
-    secret = optional(object({
+    secret = optional(list(object({
       identity            = optional(string)
       key_vault_secret_id = optional(string)
       name                = string
       value               = optional(string)
-    }))
+    })))
   }))
   validation {
     condition = alltrue([
       for k, v in var.container_apps : (
-        length(v.template.azure_queue_scale_rule.authentication) >= 1
+        v.template.azure_queue_scale_rule == null || alltrue([for item in v.template.azure_queue_scale_rule : (length(item.authentication) >= 1)])
       )
     ])
     error_message = "Each authentication list must contain at least 1 items"
@@ -396,7 +396,7 @@ EOT
   validation {
     condition = alltrue([
       for k, v in var.container_apps : (
-        v.template.custom_scale_rule.authentication == null || (length(v.template.custom_scale_rule.authentication) >= 1)
+        v.template.custom_scale_rule == null || alltrue([for item in v.template.custom_scale_rule : (item.authentication == null || (length(item.authentication) >= 1))])
       )
     ])
     error_message = "Each authentication list must contain at least 1 items"
@@ -404,7 +404,7 @@ EOT
   validation {
     condition = alltrue([
       for k, v in var.container_apps : (
-        v.template.http_scale_rule.authentication == null || (length(v.template.http_scale_rule.authentication) >= 1)
+        v.template.http_scale_rule == null || alltrue([for item in v.template.http_scale_rule : (item.authentication == null || (length(item.authentication) >= 1))])
       )
     ])
     error_message = "Each authentication list must contain at least 1 items"
@@ -428,7 +428,7 @@ EOT
   validation {
     condition = alltrue([
       for k, v in var.container_apps : (
-        v.template.tcp_scale_rule.authentication == null || (length(v.template.tcp_scale_rule.authentication) >= 1)
+        v.template.tcp_scale_rule == null || alltrue([for item in v.template.tcp_scale_rule : (item.authentication == null || (length(item.authentication) >= 1))])
       )
     ])
     error_message = "Each authentication list must contain at least 1 items"
