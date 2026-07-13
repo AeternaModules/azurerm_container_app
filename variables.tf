@@ -188,48 +188,48 @@ EOT
         })))
         image = string
         liveness_probe = optional(list(object({
-          failure_count_threshold = optional(number) # Default: 3
+          failure_count_threshold = optional(number)
           header = optional(list(object({
             name  = string
             value = string
           })))
           host             = optional(string)
-          initial_delay    = optional(number) # Default: 1
-          interval_seconds = optional(number) # Default: 10
+          initial_delay    = optional(number)
+          interval_seconds = optional(number)
           path             = optional(string)
           port             = number
-          timeout          = optional(number) # Default: 1
+          timeout          = optional(number)
           transport        = string
         })))
         memory = string
         name   = string
         readiness_probe = optional(list(object({
-          failure_count_threshold = optional(number) # Default: 3
+          failure_count_threshold = optional(number)
           header = optional(list(object({
             name  = string
             value = string
           })))
           host                    = optional(string)
-          initial_delay           = optional(number) # Default: 0
-          interval_seconds        = optional(number) # Default: 10
+          initial_delay           = optional(number)
+          interval_seconds        = optional(number)
           path                    = optional(string)
           port                    = number
-          success_count_threshold = optional(number) # Default: 3
-          timeout                 = optional(number) # Default: 1
+          success_count_threshold = optional(number)
+          timeout                 = optional(number)
           transport               = string
         })))
         startup_probe = optional(list(object({
-          failure_count_threshold = optional(number) # Default: 3
+          failure_count_threshold = optional(number)
           header = optional(list(object({
             name  = string
             value = string
           })))
           host             = optional(string)
-          initial_delay    = optional(number) # Default: 0
-          interval_seconds = optional(number) # Default: 10
+          initial_delay    = optional(number)
+          interval_seconds = optional(number)
           path             = optional(string)
           port             = number
-          timeout          = optional(number) # Default: 1
+          timeout          = optional(number)
           transport        = string
         })))
         volume_mounts = optional(list(object({
@@ -238,7 +238,7 @@ EOT
           sub_path = optional(string)
         })))
       }))
-      cooldown_period_in_seconds = optional(number) # Default: 300
+      cooldown_period_in_seconds = optional(number)
       custom_scale_rule = optional(list(object({
         authentication = optional(list(object({
           secret_name       = string
@@ -275,9 +275,9 @@ EOT
           sub_path = optional(string)
         })))
       })))
-      max_replicas                = optional(number) # Default: 10
-      min_replicas                = optional(number) # Default: 0
-      polling_interval_in_seconds = optional(number) # Default: 30
+      max_replicas                = optional(number)
+      min_replicas                = optional(number)
+      polling_interval_in_seconds = optional(number)
       revision_suffix             = optional(string)
       tcp_scale_rule = optional(list(object({
         authentication = optional(list(object({
@@ -287,28 +287,28 @@ EOT
         concurrent_requests = string
         name                = string
       })))
-      termination_grace_period_seconds = optional(number) # Default: 0
+      termination_grace_period_seconds = optional(number)
       volume = optional(list(object({
         mount_options = optional(string)
         name          = string
         storage_name  = optional(string)
-        storage_type  = optional(string) # Default: "EmptyDir"
+        storage_type  = optional(string)
       })))
     })
     dapr = optional(object({
       app_id       = string
       app_port     = optional(number)
-      app_protocol = optional(string) # Default: "http"
+      app_protocol = optional(string)
     }))
     identity = optional(object({
       identity_ids = optional(set(string))
       type         = string
     }))
     ingress = optional(object({
-      allow_insecure_connections = optional(bool) # Default: false
+      allow_insecure_connections = optional(bool)
       client_certificate_mode    = optional(string)
       cors = optional(object({
-        allow_credentials_enabled = optional(bool) # Default: false
+        allow_credentials_enabled = optional(bool)
         allowed_headers           = optional(list(string))
         allowed_methods           = optional(list(string))
         allowed_origins           = list(string)
@@ -316,7 +316,7 @@ EOT
         max_age_in_seconds        = optional(number)
       }))
       exposed_port     = optional(number)
-      external_enabled = optional(bool) # Default: false
+      external_enabled = optional(bool)
       ip_security_restriction = optional(list(object({
         action           = string
         description      = optional(string)
@@ -326,11 +326,11 @@ EOT
       target_port = number
       traffic_weight = list(object({
         label           = optional(string)
-        latest_revision = optional(bool) # Default: false
+        latest_revision = optional(bool)
         percentage      = number
         revision_suffix = optional(string)
       }))
-      transport = optional(string) # Default: "auto"
+      transport = optional(string)
     }))
     registry = optional(list(object({
       identity             = optional(string)
@@ -364,90 +364,10 @@ EOT
   validation {
     condition = alltrue([
       for k, v in var.container_apps : (
-        alltrue([for item in v.template.container : (item.env == null || (length(item.env) >= 1))])
+        v.ingress == null || (length(v.ingress.traffic_weight) >= 1)
       )
     ])
-    error_message = "Each env list must contain at least 1 items"
-  }
-  validation {
-    condition = alltrue([
-      for k, v in var.container_apps : (
-        alltrue([for item in v.template.container : (item.liveness_probe == null || (length(item.liveness_probe) >= 1))])
-      )
-    ])
-    error_message = "Each liveness_probe list must contain at least 1 items"
-  }
-  validation {
-    condition = alltrue([
-      for k, v in var.container_apps : (
-        alltrue([for item in v.template.container : (item.readiness_probe == null || (length(item.readiness_probe) >= 1))])
-      )
-    ])
-    error_message = "Each readiness_probe list must contain at least 1 items"
-  }
-  validation {
-    condition = alltrue([
-      for k, v in var.container_apps : (
-        alltrue([for item in v.template.container : (item.startup_probe == null || (length(item.startup_probe) >= 1))])
-      )
-    ])
-    error_message = "Each startup_probe list must contain at least 1 items"
-  }
-  validation {
-    condition = alltrue([
-      for k, v in var.container_apps : (
-        v.template.custom_scale_rule == null || alltrue([for item in v.template.custom_scale_rule : (item.authentication == null || (length(item.authentication) >= 1))])
-      )
-    ])
-    error_message = "Each authentication list must contain at least 1 items"
-  }
-  validation {
-    condition = alltrue([
-      for k, v in var.container_apps : (
-        v.template.http_scale_rule == null || alltrue([for item in v.template.http_scale_rule : (item.authentication == null || (length(item.authentication) >= 1))])
-      )
-    ])
-    error_message = "Each authentication list must contain at least 1 items"
-  }
-  validation {
-    condition = alltrue([
-      for k, v in var.container_apps : (
-        v.template.init_container == null || (length(v.template.init_container) >= 1)
-      )
-    ])
-    error_message = "Each init_container list must contain at least 1 items"
-  }
-  validation {
-    condition = alltrue([
-      for k, v in var.container_apps : (
-        v.template.init_container == null || alltrue([for item in v.template.init_container : (item.env == null || (length(item.env) >= 1))])
-      )
-    ])
-    error_message = "Each env list must contain at least 1 items"
-  }
-  validation {
-    condition = alltrue([
-      for k, v in var.container_apps : (
-        v.template.tcp_scale_rule == null || alltrue([for item in v.template.tcp_scale_rule : (item.authentication == null || (length(item.authentication) >= 1))])
-      )
-    ])
-    error_message = "Each authentication list must contain at least 1 items"
-  }
-  validation {
-    condition = alltrue([
-      for k, v in var.container_apps : (
-        v.template.volume == null || (length(v.template.volume) >= 1)
-      )
-    ])
-    error_message = "Each volume list must contain at least 1 items"
-  }
-  validation {
-    condition = alltrue([
-      for k, v in var.container_apps : (
-        v.registry == null || (length(v.registry) >= 1)
-      )
-    ])
-    error_message = "Each registry list must contain at least 1 items"
+    error_message = "Each traffic_weight list must contain at least 1 items"
   }
 }
 
