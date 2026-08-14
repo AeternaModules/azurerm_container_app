@@ -13,15 +13,15 @@ output "container_apps_custom_domain_verification_id" {
 }
 output "container_apps_dapr" {
   description = "Map of dapr values across all container_apps, keyed the same as var.container_apps"
-  value       = { for k, v in azurerm_container_app.container_apps : k => v.dapr if v.dapr != null && length(v.dapr) > 0 }
+  value       = { for k, v in azurerm_container_app.container_apps : k => one(v.dapr) if v.dapr != null && length(v.dapr) > 0 }
 }
 output "container_apps_identity" {
   description = "Map of identity values across all container_apps, keyed the same as var.container_apps"
-  value       = { for k, v in azurerm_container_app.container_apps : k => v.identity if v.identity != null && length(v.identity) > 0 }
+  value       = { for k, v in azurerm_container_app.container_apps : k => one(v.identity) if v.identity != null && length(v.identity) > 0 }
 }
 output "container_apps_ingress" {
   description = "Map of ingress values across all container_apps, keyed the same as var.container_apps"
-  value       = { for k, v in azurerm_container_app.container_apps : k => v.ingress if v.ingress != null && length(v.ingress) > 0 }
+  value       = { for k, v in azurerm_container_app.container_apps : k => one(v.ingress) if v.ingress != null && length(v.ingress) > 0 }
 }
 output "container_apps_latest_revision_fqdn" {
   description = "Map of latest_revision_fqdn values across all container_apps, keyed the same as var.container_apps"
@@ -70,7 +70,7 @@ output "container_apps_tags" {
 }
 output "container_apps_template" {
   description = "Map of template values across all container_apps, keyed the same as var.container_apps"
-  value       = { for k, v in azurerm_container_app.container_apps : k => v.template if v.template != null && length(v.template) > 0 }
+  value       = { for k, v in azurerm_container_app.container_apps : k => one(v.template) if v.template != null && length(v.template) > 0 }
 }
 output "container_apps_workload_profile_name" {
   description = "Map of workload_profile_name values across all container_apps, keyed the same as var.container_apps"
